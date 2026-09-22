@@ -1,0 +1,71 @@
+#include <Servo.h>
+
+Servo gateServo;
+
+// Pin connections
+const int trigPin = 9;
+const int echoPin = 10;
+const int buzzerPin = 8;
+const int servoPin = 6;
+
+long duration;
+float distance;
+
+void setup() {
+  pinMode(trigPin, OUTPUT);
+  pinMode(echoPin, INPUT);
+  pinMode(buzzerPin, OUTPUT);
+
+  gateServo.attach(servoPin);
+
+  // Gate starts open
+  gateServo.write(0);
+
+  Serial.begin(9600);
+}
+
+void loop() {
+
+  // Send ultrasonic pulse
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+
+  digitalWrite(trigPin, LOW);
+
+  // Receive echo
+  duration = pulseIn(echoPin, HIGH);
+
+  // Calculate distance in cm
+  distance = duration * 0.0343 / 2;
+
+  Serial.print("Distance: ");
+  Serial.print(distance);
+  Serial.println(" cm");
+
+  // Obstacle detected between 20 cm and 50 cm
+  if (distance >= 20 && distance <= 50) {
+
+    // Close gate
+    gateServo.write(90);
+
+    // Buzzer alert
+    tone(buzzerPin, 1000);
+    delay(200);
+    noTone(buzzerPin);
+    delay(200);
+
+  } 
+  else {
+
+    // Open gate
+    gateServo.write(0);
+
+    // Buzzer OFF
+    noTone(buzzerPin);
+  }
+
+  delay(100);
+}
